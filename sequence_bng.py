@@ -13,7 +13,10 @@ class SequencePlayer():
     self.numTeams = numTeams
     self.numSequencesToWin = numSequencesToWin
     self.numCardsPerHand = numCardsPerHand
+    
+    print("--- Blind 'n Greedy (BNG) Sequence Player ---")
+    print(vars(self))
   
   
   def play(self):
-    pass
+    print("Playing")
