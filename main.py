@@ -14,7 +14,7 @@ def main(args):
   print("- Blind 'n Greedy (BNG) Version -\n")
   print(args)
   
-  playerId = args.pos - 1
+  playerId = args.pos
   numPlayers = args.players
   numTeams = args.teams
   numCardsPerHand = CARDS_PER_HAND_PER_PLAYER_COUNT[numPlayers]
