@@ -35,6 +35,9 @@ class SequencePlayer():
   numSequencesToWin = None
   numCardsPerHand = None
   
+  board = None
+  boardLen = 10
+  
   def __init__(self, playerId, numPlayers, numTeams, numSequencesToWin, numCardsPerHand):
     self.playerId = playerId
     self.numPlayers = numPlayers
@@ -44,7 +47,16 @@ class SequencePlayer():
     
     print("--- Blind 'n Greedy (BNG) Sequence Player ---")
     print(vars(self))
-  
+    
+    self.board = [[0 for i in range(self.boardLen)] for j in range(self.boardLen)]
   
   def play(self):
     print("Playing")
+  
+  
+  def printBoard(self):
+    for r in self.board:
+      for p in r:
+        print(str(p).ljust(4), end = "")
+      print("")
+
