@@ -2,7 +2,7 @@
 
 # d = diamonds, c = clubs, h = hearts, s = spades
 # free = corner free spot
-BOARD_LAYOUT = [
+BOARD_CARD_LAYOUT = [
   ["free", "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "free"],
   ["6c", "5c", "4c", "3c", "2c", "ah", "kh", "qh", "10h", "10s"],
   ["7c", "as", "2d", "3d", "4d", "5d", "6d", "7d", "9h", "qs"],
@@ -19,9 +19,9 @@ CARD_LOCS = {"free": [(0, 0), (0, 9), (9, 0), (9, 9)], "2s": [(0, 1), (8, 6)], "
 
 # CARD_LOCS generation code below.
 # CARD_LOCS = {}
-# for r in range(len(BOARD_LAYOUT)):
-  # for c in range(len(BOARD_LAYOUT[r])):
-    # card = BOARD_LAYOUT[r][c]
+# for r in range(len(BOARD_CARD_LAYOUT)):
+  # for c in range(len(BOARD_CARD_LAYOUT[r])):
+    # card = BOARD_CARD_LAYOUT[r][c]
     # if card in CARD_LOCS:
       # CARD_LOCS[card].append((r, c))
     # else:
