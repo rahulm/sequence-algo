@@ -22,9 +22,6 @@ def main(args):
   print("Number of cards per hand: {}".format(numCardsPerHand))
   print("Number of sequences to win: {}".format(numSequencesToWin))
   print("Player ID: {}".format(playerId))
-  
-  
-
 
 def parseArgs():
   parser = argparse.ArgumentParser(description = "Taking a shot at solving Sequence.")
