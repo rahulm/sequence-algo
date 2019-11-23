@@ -24,7 +24,7 @@ def main(args):
   print("Player ID: {}".format(playerId))
 
 def parseArgs():
-  parser = argparse.ArgumentParser(description = "Taking a shot at solving Sequence.")
+  parser = argparse.ArgumentParser(description = "Taking a shot at playing Sequence.")
   parser.add_argument(
     "--players", type = int, required = True,
     choices = {2, 3, 4, 6, 8, 9, 10, 12},
