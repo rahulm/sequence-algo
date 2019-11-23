@@ -50,13 +50,12 @@ class SequencePlayer():
     
     self.board = [[0 for i in range(self.boardLen)] for j in range(self.boardLen)]
   
-  def play(self):
-    print("Playing")
-  
-  
   def printBoard(self):
     for r in self.board:
       for p in r:
         print(str(p).ljust(4), end = "")
       print("")
-
+  
+  def play(self):
+    print("Playing")
+    
