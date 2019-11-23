@@ -1,4 +1,5 @@
 import argparse
+from sequence_bng import SequencePlayer
 
 CARDS_PER_HAND_PER_PLAYER_COUNT = {
   2 : 7, 3 : 6, 4 : 6, 6 : 5, 8 : 4, 9 : 4, 10 : 3, 12 : 3
@@ -22,6 +23,15 @@ def main(args):
   print("Number of cards per hand: {}".format(numCardsPerHand))
   print("Number of sequences to win: {}".format(numSequencesToWin))
   print("Player ID: {}".format(playerId))
+  
+  seqPlayer = SequencePlayer(
+    playerId = playerId,
+    numPlayers = numPlayers,
+    numTeams = numTeams,
+    numSequencesToWin = numSequencesToWin,
+    numCardsPerHand = numCardsPerHand
+  )
+  seqPlayer.play()
 
 def parseArgs():
   parser = argparse.ArgumentParser(description = "Taking a shot at playing Sequence.")
