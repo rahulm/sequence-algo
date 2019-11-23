@@ -8,7 +8,7 @@ def parseArgs():
   parser = argparse.ArgumentParser(description = "Taking a shot at solving Sequence.")
   parser.add_argument(
     "--players", type = int, required = True,
-    choices = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+    choices = {2, 3, 4, 6, 8, 9, 10, 12},
     help = "Total number of players."
   )
   parser.add_argument(
@@ -19,6 +19,8 @@ def parseArgs():
   args = parser.parse_args()
   if ((args.players % args.teams) != 0):
     parser.error("--players ({}) is not divisble by --teams ({}).".format(args.players, args.teams))
+  if ((args.players > 3) and (args.teams == args.players)):
+    parser.error("Only 3 players may play individually; the {} players provided must be split into teams.".format(args.players))
   
   return args
 
