@@ -59,3 +59,23 @@ class SequencePlayer():
   def play(self):
     print("Playing")
     
+    playerToMove = 1
+    gameIncomplete = True
+    
+    turn = 0
+    
+    while (gameIncomplete):
+      if (playerToMove == self.playerId):
+        print("My turn.")
+      else:
+        print("Player {}'s turn.".format(playerToMove))
+        
+        card = input("Card played: ")
+        
+      
+      self.printBoard()
+      playerToMove = (playerToMove % self.numPlayers) + 1
+      turn += 1
+      if turn == 20:
+        gameIncomplete = False
+    
