@@ -13,6 +13,7 @@ def main(args):
   print("- Blind 'n Greedy (BNG) Version -\n")
   print(args)
   
+  playerId = args.pos - 1
   numPlayers = args.players
   numTeams = args.teams
   numCardsPerHand = CARDS_PER_HAND_PER_PLAYER_COUNT[numPlayers]
@@ -20,6 +21,7 @@ def main(args):
   
   print("Number of cards per hand: {}".format(numCardsPerHand))
   print("Number of sequences to win: {}".format(numSequencesToWin))
+  print("Player ID: {}".format(playerId))
   
   
 
@@ -36,10 +38,17 @@ def parseArgs():
     choices = {2, 3},
     help = "Number of teams. If the number of teams equals the number of players, each player is individual. Players must be divisible by teams."
   )
+  parser.add_argument(
+    "--pos", type = int, required = True,
+    help = "Player position for computer. Ex: 1 means plays first, 2 means second, etc."
+  )
   
   args = parser.parse_args()
   if ((args.players % args.teams) != 0):
     parser.error("--players ({}) is not divisble by --teams ({}).".format(args.players, args.teams))
+  
+  if (args.pos <= 0) or (args.pos > args.players):
+    parser.error("--pos ({}) is invalid.".format(args.pos))
   
   return args
 
