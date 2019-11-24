@@ -72,6 +72,7 @@ class SequencePlayer():
   def play(self):
     print("Playing")
     self.printCardLayout()
+    print("")
     
     playerToMove = 1
     gameIncomplete = True
@@ -87,8 +88,8 @@ class SequencePlayer():
     while (gameIncomplete):
       teamToMove = self.playerToTeamMap[playerToMove]
       
-      if not (retry or oneEyedJack or twoEyedJack):
-        print("")
+      # if not (retry or oneEyedJack or twoEyedJack):
+        # print("")
       
       if (playerToMove == self.playerId):
         print("My turn.")
@@ -167,6 +168,7 @@ class SequencePlayer():
             self.board[optionR][optionC] = 0 if oneEyedJack else teamToMove
       
       self.printBoard()
+      print("")
       playerToMove = (playerToMove % self.numPlayers) + 1
       
       # reset markers
