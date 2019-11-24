@@ -38,6 +38,8 @@ class SequencePlayer():
   numSequencesToWin = None
   numCardsPerHand = None
   
+  playerToTeamMap = None
+  
   board = None
   boardLen = 10
   
@@ -47,6 +49,8 @@ class SequencePlayer():
     self.numTeams = numTeams
     self.numSequencesToWin = numSequencesToWin
     self.numCardsPerHand = numCardsPerHand
+    
+    self.playerToTeamMap = {(player + 1) : ((player % self.numTeams) + 1) for player in range(self.numPlayers)}
     
     print("--- Blind 'n Greedy (BNG) Sequence Player ---")
     print(vars(self))
@@ -133,8 +137,10 @@ class SequencePlayer():
           
           # Note: the one eyed jack solution here assumes all teams consist of one player
           # TODO: add support for non-singular teams
+          teamToMove = self.playerToTeamMap[playerToMove]
           if oneEyedJack:
-            allowedVals = {i for i in range(1, self.numPlayers + 1) if (playerToMove != i)}
+            allowedVals = {pl for pl in range(1, self.numPlayers + 1)
+              if (teamToMove != self.playerToTeamMap[pl])}
           
           options = [(r, c) for (r, c) in CARD_LOCS[card] if (self.board[r][c] in allowedVals)]
           
