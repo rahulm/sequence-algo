@@ -71,43 +71,75 @@ class SequencePlayer():
     
     playerToMove = 1
     gameIncomplete = True
-    retry = False
     
+    # markers
+    retry = False
+    twoEyedJack = False
+    oneEyedJack = False
+    
+    # temp
     turn = 0
     
     while (gameIncomplete):
-      if not retry:
+      if not (retry or oneEyedJack or twoEyedJack):
         print("")
       
       if (playerToMove == self.playerId):
         print("My turn.")
       else:
-        if not retry:
+        if not (retry or oneEyedJack or twoEyedJack):
           print("Player {}'s turn.".format(playerToMove))
         
-        card = input("Card played: ")
+        prompt = "Card played: "
+        if twoEyedJack:
+          prompt = "Card to place pawn at: "
+        if oneEyedJack:
+          prompt = "Card to remove pawn at: "
+        card = input(prompt)
+        
         if (card in ONE_EYED_JACKS):
-          print("One eyed jack. Need to remove a card.")
-        elif (card in TWO_EYED_JACKS):
+          if (twoEyedJack or oneEyedJack):
+            print("Need a non-jack card.")
+            retry = True
+            continue
           
-          # THIS IS VERY BAD PRACTICE, ONLY A TEMPORARY MEASURE
+          print("One eyed jack. Need a card to remove a pawn from.")
+          oneEyedJack = True
+          continue
+          
+        elif (card in TWO_EYED_JACKS):
+          if (twoEyedJack or oneEyedJack):
+            print("Need a non-jack card.")
+            retry = True
+            continue
+          
           # TODO: MAKE THIS BETTER
           print("Two eyed jack. Need another card for pawn placement.")
-          retry = True
+          twoEyedJack = True
           continue
           
         elif (card == "free") or (card not in CARD_LOCS):
           print("Not a valid card. Retrying.")
           retry = True
           continue
-        else:
-          # continue asking for card until a valid option is found
-          # this is in case a mistake was made
           
-          # find all options that are open on the board
-          options = [(r, c) for (r, c) in CARD_LOCS[card] if (self.board[r][c] == 0)]
+        else:
+          # This handles 3 situations:
+          # - normal non-jack card
+          # - finding a pawn to remove due to a one eyed jack
+          # - finding a pawn to add due to a two eyed jack
+          
+          allowedVals = {0}
+          
+          # Note: the one eyed jack solution here assumes all teams consist of one player
+          # TODO: add support for non-singular teams
+          if oneEyedJack:
+            allowedVals = {i for i in range(1, self.numPlayers + 1) if (playerToMove != i)}
+          
+          options = [(r, c) for (r, c) in CARD_LOCS[card] if (self.board[r][c] in allowedVals)]
+          
           if len(options) == 0:
-            print("No openings were found for that card. Retrying.")
+            print("No options were found for that card. Retrying.")
             retry = True
             continue
           else:
@@ -126,11 +158,15 @@ class SequencePlayer():
               continue
             
             optionR, optionC = options[optionChoice]
-            self.board[optionR][optionC] = playerToMove
+            self.board[optionR][optionC] = 0 if oneEyedJack else playerToMove
       
       self.printBoard()
       playerToMove = (playerToMove % self.numPlayers) + 1
+      
+      # reset markers
       retry = False
+      oneEyedJack = False
+      twoEyedJack = False
       
       turn += 1
       if turn == 20:
