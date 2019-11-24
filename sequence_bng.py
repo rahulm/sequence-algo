@@ -27,6 +27,9 @@ CARD_LOCS = {"free": [(0, 0), (0, 9), (9, 0), (9, 9)], "2s": [(0, 1), (8, 6)], "
     # else:
       # CARD_LOCS[card] = [(r, c)]
 
+ONE_EYED_JACKS = {"jh", "js"}
+TWO_EYED_JACKS = {"jd", "jc"}
+
 
 class SequencePlayer():
   playerId = None
@@ -50,6 +53,12 @@ class SequencePlayer():
     
     self.board = [[0 for i in range(self.boardLen)] for j in range(self.boardLen)]
   
+  def printCardLayout(self):
+    for r in BOARD_CARD_LAYOUT:
+      for p in r:
+        print(str(p).ljust(6), end = "")
+      print("")
+  
   def printBoard(self):
     for r in self.board:
       for p in r:
@@ -58,23 +67,65 @@ class SequencePlayer():
   
   def play(self):
     print("Playing")
+    self.printCardLayout()
     
     playerToMove = 1
     gameIncomplete = True
+    retry = False
     
     turn = 0
     
     while (gameIncomplete):
+      if not retry:
+        print("")
+      
       if (playerToMove == self.playerId):
         print("My turn.")
       else:
-        print("Player {}'s turn.".format(playerToMove))
+        if not retry:
+          print("Player {}'s turn.".format(playerToMove))
         
         card = input("Card played: ")
-        
+        if (card in ONE_EYED_JACKS):
+          print("One eyed jack. Need to remove a card.")
+        elif (card in TWO_EYED_JACKS):
+          print("Two eyed jack. Need to place a pawn.")
+        elif (card == "free") or (card not in CARD_LOCS):
+          print("Not a valid card. Retrying.")
+          retry = True
+          continue
+        else:
+          # continue asking for card until a valid option is found
+          # this is in case a mistake was made
+          
+          # find all options that are open on the board
+          options = [(r, c) for (r, c) in CARD_LOCS[card] if (self.board[r][c] == 0)]
+          if len(options) == 0:
+            print("No openings were found for that card. Retrying.")
+            retry = True
+            continue
+          else:
+            print("Options (top to down, left to right):")
+            for optionInd, (r, c) in enumerate(options):
+              print("    {}  -  row={} col={}".format(optionInd + 1, r, c))
+            optionChoice = input("Select: ")
+            
+            try:
+              optionChoice = int(optionChoice) - 1
+              if (optionChoice <= -1) or (optionChoice >= len(options)):
+                raise Exception()
+            except:
+              print("Choice was invalid. Retrying.")
+              retry = True
+              continue
+            
+            optionR, optionC = options[optionChoice]
+            self.board[optionR][optionC] = playerToMove
       
       self.printBoard()
       playerToMove = (playerToMove % self.numPlayers) + 1
+      retry = False
+      
       turn += 1
       if turn == 20:
         gameIncomplete = False
