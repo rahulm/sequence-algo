@@ -128,9 +128,21 @@ class SequencePlayer():
         markers["retry"] = True
         return
       
-      print("One eyed jack. Need a card to remove a pawn from.")
-      markers["oneEyedJack"] = True
-      return
+      # only proceed if there are pawns that can be removed
+      allowedVals = {team for team in range(1, self.numTeams + 1) if (teamToMove != team)}
+      options = [
+        (r, c) for r in range(self.boardLen) for c in range(self.boardLen)
+        if (self.board[r][c] in allowedVals)
+      ]
+      
+      if (len(options) == 0):
+        print("No pawns can be removed. Play a different card.")
+        markers["retry"] = True
+        return
+      else:
+        print("One eyed jack. Need a card to remove a pawn from.")
+        markers["oneEyedJack"] = True
+        return
       
     elif (card in TWO_EYED_JACKS):
       if (markers["twoEyedJack"] or markers["oneEyedJack"]):
@@ -138,10 +150,21 @@ class SequencePlayer():
         markers["retry"] = True
         return
       
-      # TODO: MAKE THIS BETTER
-      print("Two eyed jack. Need another card for pawn placement.")
-      markers["twoEyedJack"] = True
-      return
+      # only proceed if there are spaces where a pawn can be placed
+      allowedVals = {0}
+      options = [
+        (r, c) for r in range(self.boardLen) for c in range(self.boardLen)
+        if ((BOARD_CARD_LAYOUT[r][c] != "free") and (self.board[r][c] in allowedVals))
+      ]
+      
+      if (len(options) == 0):
+        print("No open spaces to place a pawn. Play a different card.")
+        markers["retry"] = True
+        return
+      else:
+        print("Two eyed jack. Need another card for pawn placement.")
+        markers["twoEyedJack"] = True
+        return
       
     elif (card == "free") or (card not in CARD_LOCS):
       print("Not a valid card. Retrying.")
