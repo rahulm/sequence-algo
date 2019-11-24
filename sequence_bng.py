@@ -85,6 +85,8 @@ class SequencePlayer():
     turn = 0
     
     while (gameIncomplete):
+      teamToMove = self.playerToTeamMap[playerToMove]
+      
       if not (retry or oneEyedJack or twoEyedJack):
         print("")
       
@@ -92,7 +94,7 @@ class SequencePlayer():
         print("My turn.")
       else:
         if not (retry or oneEyedJack or twoEyedJack):
-          print("Player {}'s turn.".format(playerToMove))
+          print("Player {}'s (team {}) turn.".format(playerToMove, teamToMove))
         
         prompt = "Card played: "
         if twoEyedJack:
@@ -137,10 +139,8 @@ class SequencePlayer():
           
           # Note: the one eyed jack solution here assumes all teams consist of one player
           # TODO: add support for non-singular teams
-          teamToMove = self.playerToTeamMap[playerToMove]
           if oneEyedJack:
-            allowedVals = {pl for pl in range(1, self.numPlayers + 1)
-              if (teamToMove != self.playerToTeamMap[pl])}
+            allowedVals = {team for team in range(1, self.numTeams + 1) if (teamToMove != team)}
           
           options = [(r, c) for (r, c) in CARD_LOCS[card] if (self.board[r][c] in allowedVals)]
           
@@ -164,7 +164,7 @@ class SequencePlayer():
               continue
             
             optionR, optionC = options[optionChoice]
-            self.board[optionR][optionC] = 0 if oneEyedJack else playerToMove
+            self.board[optionR][optionC] = 0 if oneEyedJack else teamToMove
       
       self.printBoard()
       playerToMove = (playerToMove % self.numPlayers) + 1
