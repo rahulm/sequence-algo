@@ -93,7 +93,7 @@ class SequencePlayer():
       if (playerToMove == self.playerId):
         print("My turn.")
       else:
-        self.recordPlayerMove(playerToMove, teamToMove, markers)
+        self.recordPlayerTurn(playerToMove, teamToMove, markers)
         if any(markers.values()):
           continue
       
@@ -111,7 +111,7 @@ class SequencePlayer():
       if turn == 20:
         gameIncomplete = False
   
-  def recordPlayerMove(self, playerToMove, teamToMove, markers):
+  def recordPlayerTurn(self, playerToMove, teamToMove, markers):
     if not (markers["retry"] or markers["oneEyedJack"] or markers["twoEyedJack"]):
       print("Player {}'s (team {}) turn.".format(playerToMove, teamToMove))
     
