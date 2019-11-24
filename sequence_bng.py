@@ -89,7 +89,13 @@ class SequencePlayer():
         if (card in ONE_EYED_JACKS):
           print("One eyed jack. Need to remove a card.")
         elif (card in TWO_EYED_JACKS):
-          print("Two eyed jack. Need to place a pawn.")
+          
+          # THIS IS VERY BAD PRACTICE, ONLY A TEMPORARY MEASURE
+          # TODO: MAKE THIS BETTER
+          print("Two eyed jack. Need another card for pawn placement.")
+          retry = True
+          continue
+          
         elif (card == "free") or (card not in CARD_LOCS):
           print("Not a valid card. Retrying.")
           retry = True
