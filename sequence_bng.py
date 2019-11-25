@@ -43,6 +43,7 @@ class SequencePlayer():
   
   board = None
   boardLen = 10
+  numPawnsInASequence = 5
   
   def __init__(self, playerId, numPlayers, numTeams, numSequencesToWin, numCardsPerHand):
     self.playerId = playerId
@@ -74,6 +75,12 @@ class SequencePlayer():
   
   def printBoard(self):
     self.printMatrix(self.board, 6)
+  
+  def printSequence(self, seq):
+    emptyBoard = [[0 for r in range(self.boardLen)] for c in range(self.boardLen)]
+    for (r, c) in seq:
+      emptyBoard[r][c] = "X"
+    self.printMatrix(emptyBoard, 6)
   
   def play(self):
     print("Playing")
@@ -227,5 +234,54 @@ class SequencePlayer():
     # - currently, does not make any attempts at blocking opponents
     
     pass
+  
+  def newSequencesMade(self, teamIds = None):
+    if teamIds is None:
+      teamIds = {t for t in range(1, self.numTeams + 1)}
+    elif isinstance(teamIds, int):
+      teamIds = {teamIds}
     
+    validSeqs = []
     
+    for row in range(self.boardLen):
+      for col in range(self.boardLen):
+        # skip if not a valid pawn
+        if (self.board[row][col] not in teamIds):
+          continue
+          
+        team = self.board[row][col]
+        
+        # in each of the eight directions, attempt to make a sequence
+        for xSlope in [-1, 0, 1]:
+          for ySlope in [-1, 0, 1]:
+            if (xSlope == 0) and (ySlope == 0):
+              continue
+            
+            # start counting
+            seq = []
+            count = 0
+            allNew = True
+            r, c = row, col
+            while ((r >= 0) and (r < self.boardLen) and (c >= 0) and (c < self.boardLen)):
+              pawn = self.board[r][c]
+              print(pawn)
+              
+              if ((pawn == team) or (pawn == "free")):
+                count += 1
+                seq.append((r, c))
+              elif ((pawn == -team) and allNew):
+                allNew = False
+                count += 1
+                seq.append((r, c))
+              else:
+                break
+              
+              if (count == self.numPawnsInASequence):
+                validSeqs.append(seq)
+                break
+              
+              r += ySlope
+              c += xSlope
+    
+    return validSeqs
+
