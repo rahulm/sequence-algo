@@ -98,17 +98,14 @@ class SequencePlayer():
     print("What cards do I start off with?")
     while True:
       cards = input("Initial hand (card codes separated by spaces): ")
-      try:
-        cards = cards.lower().split(" ")
-        if (len(cards) != self.numCardsPerHand):
-          raise Exception()
-        
-        for c in cards:
-          if (c not in VALID_CARDS):
-            raise Exception()
-        
-      except:
-        print("Hand was invalid. Retrying.")
+      cards = cards.lower().split(" ")
+      
+      if (len(cards) != self.numCardsPerHand):
+        print("Wrong number of cards. Need {} cards total. Retrying.".format(self.numCardsPerHand))
+        continue
+      
+      if any((c not in VALID_CARDS) for c in cards):
+        print("Hand is invalid. Retrying.")
         continue
       
       # if successful, break
