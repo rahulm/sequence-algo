@@ -60,17 +60,17 @@ class SequencePlayer():
       for c in [0, self.boardLen - 1]:
         self.board[r][c] = "free"
   
-  def printCardLayout(self):
-    for r in BOARD_CARD_LAYOUT:
-      for p in r:
-        print(str(p).ljust(6), end = "")
+  def printMatrix(self, matrix, spacing):
+    for row in matrix:
+      for val in row:
+        print(str(val).ljust(spacing), end = "")
       print("")
   
+  def printCardLayout(self):
+    self.printMatrix(BOARD_CARD_LAYOUT, 6)
+  
   def printBoard(self):
-    for r in self.board:
-      for p in r:
-        print(str(p).ljust(6), end = "")
-      print("")
+    self.printMatrix(self.board, 6)
   
   def play(self):
     print("Playing")
