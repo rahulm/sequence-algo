@@ -123,6 +123,7 @@ class SequencePlayer():
         if (teamScore == self.numSequencesToWin):
           gameIncomplete = False
           print("Team {} wins!".format(teamId))
+          break
   
   def recordPlayerTurn(self, playerToMove, teamToMove, markers):
     if not (markers["retry"] or markers["oneEyedJack"] or markers["twoEyedJack"]):
@@ -225,7 +226,56 @@ class SequencePlayer():
     markers["retry"] = False
     markers["oneEyedJack"] = False
     markers["twoEyedJack"] = False
-  
+    
+    # check if sequences were completed
+    while True:
+      seqs = self.newSequencesMade(teamToMove)
+      if (len(seqs) == 0):
+        break
+      
+      print(">>> New sequences found <<<")
+      seqToApply = None
+      
+      # if only one option, then apply it
+      if (len(seqs) == 1):
+        seqToApply = seqs[0]
+      else:
+        # otherwise, show possibilities, allow player to select one at a time
+        print("Select which one to apply from below:")
+        for seqInd, seq in enumerate(seqs):
+          # 9 * 6 + 1
+          # 54 + 1
+          # 54 / 2 = 27
+          # 52 / 2 = 26
+          print("{0} {1} {0}".format("-"*int(52 / 2), seqInd + 1))
+          self.printSequence(seq)
+          print("")
+        
+        while True:
+          seqInd = input(">>> Sequence to apply: ")
+          try:
+            seqInd = int(seqInd) - 1
+            if (seqInd <= -1) or (seqInd >= len(seqs)):
+              raise Exception()
+          except:
+            print("Choice was invalid. Retrying.")
+            continue
+          
+          seqToApply = seqs[seqInd]
+          break
+        
+      # apply single sequence
+      for (r, c) in seqToApply:
+        if self.board[r][c] == teamToMove:
+          self.board[r][c] = -teamToMove
+      
+      # increment team score
+      self.teamScores[teamToMove] += 1
+      
+      # if the score is already a winning one, then end
+      if self.teamScores[teamToMove] >= self.numSequencesToWin:
+        break
+      
   
   def playBotTurn(self, playerToMove, teamToMove):
     # for this algo:
