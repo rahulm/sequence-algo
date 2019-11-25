@@ -39,6 +39,7 @@ class SequencePlayer():
   numCardsPerHand = None
   
   playerToTeamMap = None
+  teamScores = None
   
   board = None
   boardLen = 10
@@ -59,6 +60,8 @@ class SequencePlayer():
     for r in [0, self.boardLen - 1]:
       for c in [0, self.boardLen - 1]:
         self.board[r][c] = "free"
+    
+    self.teamScores = {team : 0 for team in range(1, self.numTeams + 1)}
   
   def printMatrix(self, matrix, spacing):
     for row in matrix:
@@ -87,9 +90,6 @@ class SequencePlayer():
       "oneEyedJack" : False
     }
     
-    # temp
-    turn = 0
-    
     while (gameIncomplete):
       teamToMove = self.playerToTeamMap[playerToMove]
       
@@ -111,9 +111,11 @@ class SequencePlayer():
       print("")
       playerToMove = (playerToMove % self.numPlayers) + 1
       
-      turn += 1
-      if turn == 20:
-        gameIncomplete = False
+      # check if any team has won
+      for teamId, teamScore in self.teamScores.items():
+        if (teamScore == self.numSequencesToWin):
+          gameIncomplete = False
+          print("Team {} wins!".format(teamId))
   
   def recordPlayerTurn(self, playerToMove, teamToMove, markers):
     if not (markers["retry"] or markers["oneEyedJack"] or markers["twoEyedJack"]):
