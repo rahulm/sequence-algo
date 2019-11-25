@@ -56,6 +56,9 @@ class SequencePlayer():
     print(vars(self))
     
     self.board = [[0 for i in range(self.boardLen)] for j in range(self.boardLen)]
+    for r in [0, self.boardLen - 1]:
+      for c in [0, self.boardLen - 1]:
+        self.board[r][c] = "free"
   
   def printCardLayout(self):
     for r in BOARD_CARD_LAYOUT:
@@ -66,7 +69,7 @@ class SequencePlayer():
   def printBoard(self):
     for r in self.board:
       for p in r:
-        print(str(p).ljust(4), end = "")
+        print(str(p).ljust(6), end = "")
       print("")
   
   def play(self):
