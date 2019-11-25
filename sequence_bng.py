@@ -92,6 +92,7 @@ class SequencePlayer():
       
       if (playerToMove == self.playerId):
         print("My turn.")
+        self.playBotTurn(playerToMove, teamToMove)
       else:
         self.recordPlayerTurn(playerToMove, teamToMove, markers)
         if any(markers.values()):
@@ -212,3 +213,14 @@ class SequencePlayer():
     markers["retry"] = False
     markers["oneEyedJack"] = False
     markers["twoEyedJack"] = False
+  
+  
+  def playBotTurn(self, playerToMove, teamToMove):
+    # for this algo:
+    # - play the card that maximizes the total length of sequences if a card is placed
+    # - always replace dead cards first
+    # - currently, does not make any attempts at blocking opponents
+    
+    pass
+    
+    
