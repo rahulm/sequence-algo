@@ -264,7 +264,6 @@ class SequencePlayer():
             r, c = row, col
             while ((r >= 0) and (r < self.boardLen) and (c >= 0) and (c < self.boardLen)):
               pawn = self.board[r][c]
-              print(pawn)
               
               if ((pawn == team) or (pawn == "free")):
                 count += 1
