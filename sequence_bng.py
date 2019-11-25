@@ -30,6 +30,14 @@ CARD_LOCS = {"free": [(0, 0), (0, 9), (9, 0), (9, 9)], "2s": [(0, 1), (8, 6)], "
 ONE_EYED_JACKS = {"jh", "js"}
 TWO_EYED_JACKS = {"jd", "jc"}
 
+# VALID_CARDS generation code below.
+# VALID_CARDS = set(CARD_LOCS.keys())
+# VALID_CARDS.update(ONE_EYED_JACKS)
+# VALID_CARDS.update(TWO_EYED_JACKS)
+# VALID_CARDS.remove("free")
+
+VALID_CARDS = {"5c", "5s", "7d", "5d", "8s", "10d", "jc", "3c", "3s", "4c", "7c", "qs", "8h", "3h", "6c", "10c", "ad", "jd", "8c", "ks", "2h", "7h", "6d", "3d", "2c", "jh", "5h", "4d", "js", "9s", "9h", "kc", "10h", "qh", "10s", "4s", "9c", "6s", "4h", "kd", "qd", "2s", "8d", "ah", "as", "2d", "7s", "qc", "6h", "ac", "9d", "kh"}
+
 
 class SequencePlayer():
   playerId = None
@@ -44,6 +52,8 @@ class SequencePlayer():
   board = None
   boardLen = 10
   numPawnsInASequence = 5
+  
+  botHand = None
   
   def __init__(self, playerId, numPlayers, numTeams, numSequencesToWin, numCardsPerHand):
     self.playerId = playerId
@@ -63,6 +73,8 @@ class SequencePlayer():
         self.board[r][c] = "free"
     
     self.teamScores = {team : 0 for team in range(1, self.numTeams + 1)}
+    
+    self.botHand = []
   
   def printMatrix(self, matrix, spacing):
     for row in matrix:
@@ -82,9 +94,34 @@ class SequencePlayer():
       emptyBoard[r][c] = "X"
     self.printMatrix(emptyBoard, 6)
   
+  def initBotHand(self):
+    print("What cards do I start off with?")
+    while True:
+      cards = input("Initial hand (card codes separated by spaces): ")
+      try:
+        cards = cards.lower().split(" ")
+        if (len(cards) != self.numCardsPerHand):
+          raise Exception()
+        
+        for c in cards:
+          if (c not in VALID_CARDS):
+            raise Exception()
+        
+      except:
+        print("Hand was invalid. Retrying.")
+        continue
+      
+      # if successful, break
+      self.botHand = cards
+      print("Bot hand: {}".format(self.botHand))
+      break
+  
   def play(self):
     print("Playing")
     self.printCardLayout()
+    print("")
+    
+    self.initBotHand()
     print("")
     
     playerToMove = 1
