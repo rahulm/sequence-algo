@@ -316,11 +316,38 @@ class SequencePlayer():
   
   def playBotTurn(self, playerToMove, teamToMove):
     # for this algo:
-    # - play the card that maximizes the total length of sequences if a card is placed
     # - always replace dead cards first
+    # - play the card that maximizes the total length of sequences if a card is placed
     # - currently, does not make any attempts at blocking opponents
     
-    pass
+    # replace dead card, if possible
+    for cardInd in range(len(self.botHand)):
+      card = self.botHand[cardInd]
+      
+      # ignore jacks
+      if (card in ONE_EYED_JACKS) or (card in TWO_EYED_JACKS):
+        continue
+      
+      # get open slots
+      slots = sum(1 for (r, c) in CARD_LOCS[card] if (self.board[r][c] == 0))
+      
+      # replace card if no open slots found
+      if (slots == 0):
+        print("Discarding {}. Please pick up a replacement.".format(card))
+        while True:
+          replacementCard = input("Card picked for replacement: ")
+          if (replacementCard not in VALID_CARDS):
+            print("Replacement card is invalid. Retrying.")
+          else:
+            del self.botHand[cardInd]
+            self.botHand.append(replacementCard)
+            break
+        
+        # once replacement is complete, break out of dead card check
+        break
+    
+    print("Bot hand: {}".format(self.botHand))
+    
   
   def newSequencesMade(self, teamIds = None):
     if teamIds is None:
