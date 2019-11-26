@@ -515,12 +515,21 @@ class SequencePlayer():
       bestLocC = bestAction["location"][1]
       self.botHand.remove(bestCard)
       
+      # save prevTeamVal for printing
+      prevTeamVal = self.board[bestLocR][bestLocC]
+      
       # place or remove pawn at location, as necessary
       valToPlace = 0 if (bestCard in ONE_EYED_JACKS) else botTeamId
       self.board[bestLocR][bestLocC] = valToPlace
       
       # print action
       print(">>> Played {} at row={} col={} <<<".format(bestCard, bestLocR, bestLocC))
+      # if it was a removal (replacement with empty=0), notify
+      if (valToPlace == 0):
+        print(">>> Removed team {}'s pawn from {} <<<".format(prevTeamVal, BOARD_CARD_LAYOUT[bestLocR][bestLocC]))
+      # if it was a two eyed jack, notify
+      if (bestCard in TWO_EYED_JACKS):
+        print(">>> Placed pawn on {} space <<<".format(BOARD_CARD_LAYOUT[bestLocR][bestLocC]))
     
     # after performing the action, check if any sequences were made.
     # if they were, automatically select the first one every time.
