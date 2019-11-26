@@ -314,6 +314,11 @@ class SequencePlayer():
     print("")
     self.printBoard()
   
+  def getPawnForHeuristic(self, r, c):
+    if ((r < 0) or (c < 0) or (r >= self.boardLen) or (c >= self.boardLen)):
+      return 0
+    return self.board[r][c]
+  
   def calculateHeuristicScoreOnSegment(self, teamId, segmentLength, rStart, cStart, rSlope, cSlope):
     numPawnsPerTeam = {t : 0 for t in range(1, self.numTeams + 1)}
     countedUsedPawn = {t : False for t in range(1, self.numTeams + 1)}
@@ -322,7 +327,7 @@ class SequencePlayer():
     r, c = rStart, cStart
     
     while (totalSpaceCount < segmentLength):      
-      pawnAtSpace = self.board[r][c]
+      pawnAtSpace = self.getPawnForHeuristic(r, c)
       teamsToIncrement = []
       if (pawnAtSpace == "free"):
         for t in numPawnsPerTeam.keys():
