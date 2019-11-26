@@ -368,23 +368,27 @@ class SequencePlayer():
     vals = []
     
     # calculate downward segements
-    for r in range(self.boardLen - self.numPawnsInASequence + 1):
+    # adding virtual padding to top and bottom of board
+    for r in range(-self.numPawnsInASequence + 1, self.boardLen):
       for c in range(self.boardLen):
         vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 1, 0))
     
     # calculate rightward segements
+    # adding virtual padding to left and right of board
     for r in range(self.boardLen):
-      for c in range(self.boardLen - self.numPawnsInASequence + 1):
+      for c in range(-self.numPawnsInASequence + 1, self.boardLen):
         vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 0, 1))
     
-    # calculate diagonal down segements
-    for r in range(self.boardLen - self.numPawnsInASequence + 1):
-      for c in range(self.boardLen - self.numPawnsInASequence + 1):
+    # calculate diagonal right segements
+    # adding virtual padding to all sides of board
+    for r in range(-self.numPawnsInASequence + 1, self.boardLen):
+      for c in range(-self.numPawnsInASequence + 1, self.boardLen):
         vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 1, 1))
     
-    # calculate diagonal up segements
-    for r in range(self.boardLen - self.numPawnsInASequence + 1):
-      for c in range(self.boardLen - 1, self.numPawnsInASequence - 2, -1):
+    # calculate diagonal left segements
+    # adding virtual padding to all sides of board
+    for r in range(-self.numPawnsInASequence + 1, self.boardLen):
+      for c in range(0, self.boardLen + self.numPawnsInASequence - 1):
         vals.append(self.calculateHeuristicScoreOnSegment(teamId, 5, r, c, 1, -1))
     
     return float(sum(vals)) / len(vals)
