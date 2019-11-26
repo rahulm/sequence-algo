@@ -677,52 +677,50 @@ class SequencePlayer():
     
     
 
-  def newSequencesMade(self, teamIds = None):
-    if teamIds is None:
-      teamIds = {t for t in range(1, self.numTeams + 1)}
-    elif isinstance(teamIds, int):
-      teamIds = {teamIds}
+  def newSequencesMade(self, teamId):
     
     validSeqs = []
     
     for row in range(self.boardLen):
       for col in range(self.boardLen):
-        # skip if not a valid pawn
-        if (self.board[row][col] not in teamIds):
-          continue
-          
-        team = self.board[row][col]
+        startTeam = self.board[row][col]
         
-        # in each of the eight directions, attempt to make a sequence
-        for xSlope in [-1, 0, 1]:
-          for ySlope in [-1, 0, 1]:
-            if (xSlope == 0) and (ySlope == 0):
-              continue
+        # skip if not a valid starting point
+        if ((startTeam != "free") and (abs(startTeam) != teamId)):
+          continue
+        
+        # in each of the 4 directions, attempt to make a sequence
+        # directions: right, down, diagonal right, diagonal left
+        for (rSlope, cSlope) in [
+          (0, 1), # right
+          (1, 0), # down
+          (1, 1), # diagonal right
+          (1, -1), # diagonal left
+        ]:
+          # start counting
+          seq = []
+          count = 0
+          allNew = True
+          r, c = row, col
+          while ((r >= 0) and (r < self.boardLen) and (c >= 0) and (c < self.boardLen)):
+            pawn = self.board[r][c]
             
-            # start counting
-            seq = []
-            count = 0
-            allNew = True
-            r, c = row, col
-            while ((r >= 0) and (r < self.boardLen) and (c >= 0) and (c < self.boardLen)):
-              pawn = self.board[r][c]
-              
-              if ((pawn == team) or (pawn == "free")):
-                count += 1
-                seq.append((r, c))
-              elif ((pawn == -team) and allNew):
-                allNew = False
-                count += 1
-                seq.append((r, c))
-              else:
-                break
-              
-              if (count == self.numPawnsInASequence):
-                validSeqs.append(seq)
-                break
-              
-              r += ySlope
-              c += xSlope
+            if ((pawn == teamId) or (pawn == "free")):
+              count += 1
+              seq.append((r, c))
+            elif ((pawn == -teamId) and allNew):
+              allNew = False
+              count += 1
+              seq.append((r, c))
+            else:
+              break
+            
+            if (count == self.numPawnsInASequence):
+              validSeqs.append(seq)
+              break
+            
+            r += rSlope
+            c += cSlope
     
     return validSeqs
 
