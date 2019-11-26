@@ -171,7 +171,9 @@ class SequencePlayer():
       prompt = "Card to remove pawn at: "
     card = input(prompt)
     
-    if (card in ONE_EYED_JACKS):
+    if (card == "pass"):
+      print("Passing.")
+    elif (card in ONE_EYED_JACKS):
       if (markers["twoEyedJack"] or markers["oneEyedJack"]):
         print("Need a non-jack card.")
         markers["retry"] = True
