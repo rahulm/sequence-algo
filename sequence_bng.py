@@ -313,9 +313,76 @@ class SequencePlayer():
     
     print("")
     self.printBoard()
+  
+  def calculateHeuristicScoreOnSegment(self, teamId, segmentLength, rStart, cStart, rSlope, cSlope):
+    numPawnsPerTeam = {t : 0 for t in range(1, self.numTeams + 1)}
+    countedUsedPawn = {t : False for t in range(1, self.numTeams + 1)}
     
+    totalSpaceCount = 0
+    r, c = rStart, cStart
+    
+    while (totalSpaceCount < segmentLength):      
+      pawnAtSpace = self.board[r][c]
+      teamsToIncrement = []
+      if (pawnAtSpace == "free"):
+        for t in numPawnsPerTeam.keys():
+          numPawnsPerTeam[t] += 1
+      elif (pawnAtSpace in numPawnsPerTeam.keys()):
+        numPawnsPerTeam[pawnAtSpace] += 1
+      elif ((pawnAtSpace < 0) and not countedUsedPawn[-pawnAtSpace]):
+        numPawnsPerTeam[-pawnAtSpace] += 1
+        countedUsedPawn[-pawnAtSpace] = True
+      
+      r += rSlope
+      c += cSlope
+      totalSpaceCount += 1
+    
+    # calculate score
+    numBotPawns = numPawnsPerTeam[teamId]
+    totalScore = 0
+    for t in range(1, self.numTeams + 1):
+      numPawns = numPawnsPerTeam[t]
+      if (t == teamId):
+        weight = pow((self.teamScores[t] + 1) / self.numSequencesToWin, 3)
+        ts = pow(numPawns + (1 if (numPawns == self.numPawnsInASequence) else 0), 2)
+        totalScore += (weight * ts)
+      else:
+        weight = pow((self.teamScores[t]
+            + (2 if
+              ((numPawns == (self.numPawnsInASequence - 1)) and (numBotPawns == 0) and (self.teamScores[t] == (self.numSequencesToWin - 1)))
+            else 1))
+          / self.numSequencesToWin,
+          3)
+        ts = pow(numPawns, 2)
+        totalScore -= (weight * ts)
+    
+    return totalScore
+  
   def calculateHeuristicScore(self, teamId):
-    return 0
+    # This heuristic score is based on averaging the heuristic score of every possible 5 segment on the board.
+    vals = []
+    
+    # calculate downward segements
+    for r in range(self.boardLen - self.numPawnsInASequence + 1):
+      for c in range(self.boardLen):
+        vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 1, 0))
+    
+    # calculate rightward segements
+    for r in range(self.boardLen):
+      for c in range(self.boardLen - self.numPawnsInASequence + 1):
+        vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 0, 1))
+    
+    # calculate diagonal down segements
+    for r in range(self.boardLen - self.numPawnsInASequence + 1):
+      for c in range(self.boardLen - self.numPawnsInASequence + 1):
+        vals.append(self.calculateHeuristicScoreOnSegment(teamId, self.numPawnsInASequence, r, c, 1, 1))
+    
+    # calculate diagonal up segements
+    for r in range(self.boardLen - self.numPawnsInASequence + 1):
+      for c in range(self.boardLen - 1, self.numPawnsInASequence - 2, -1):
+        vals.append(self.calculateHeuristicScoreOnSegment(teamId, 5, r, c, 1, -1))
+    
+    return float(sum(vals)) / len(vals)
   
   def playBotTurn(self, botPlayerId, botTeamId):
     print("My turn.")
