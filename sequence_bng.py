@@ -154,7 +154,7 @@ class SequencePlayer():
       
       # check if any team has won
       for teamId, teamScore in self.teamScores.items():
-        if (teamScore == self.numSequencesToWin):
+        if (teamScore >= self.numSequencesToWin):
           gameIncomplete = False
           print("Team {} wins!".format(teamId))
           break
