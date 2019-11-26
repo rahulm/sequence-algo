@@ -579,16 +579,17 @@ class SequencePlayer():
     # print new team score
     print("Bot team score: {}\n".format(self.teamScores[botTeamId]))
     
-    # ask for next card
-    print("I need to pick up a card.")
-    while True:
-      nextCard = input("Card picked up: ")
-      if nextCard in VALID_CARDS:
-        self.botHand.append(nextCard)
-        print("Added card {}.".format(nextCard))
-        break
-      else:
-        print("Card '{}' invalid. Retrying.".format(nextCard))
+    # ask for next card, if needed
+    if (len(self.botHand) < self.numCardsPerHand):
+      print("I need to pick up a card.")
+      while True:
+        nextCard = input("Card picked up: ")
+        if nextCard in VALID_CARDS:
+          self.botHand.append(nextCard)
+          print("Added card {}.".format(nextCard))
+          break
+        else:
+          print("Card '{}' invalid. Retrying.".format(nextCard))
     
     
     
