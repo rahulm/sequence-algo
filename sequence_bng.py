@@ -181,12 +181,12 @@ class SequencePlayer():
       for teamId, teamScore in self.teamScores.items():
         if (teamScore >= self.numSequencesToWin):
           gameIncomplete = False
-          print("Team {} wins!".format(teamId))
+          print("Team {} wins!".format(self.teamColorNames[teamId]))
           break
   
   def recordPlayerTurn(self, playerToMove, teamToMove, markers):
     if not (markers["retry"] or markers["oneEyedJack"] or markers["twoEyedJack"]):
-      print("Player {}'s (team {}) turn.".format(playerToMove, teamToMove))
+      print("Player {}'s (team {}) turn.".format(playerToMove, self.teamColorNames[teamToMove]))
     
     prompt = "Card played: "
     if markers["twoEyedJack"]:
@@ -552,7 +552,7 @@ class SequencePlayer():
       print(">>> Played {} at row={} col={} <<<".format(bestCard, bestLocR, bestLocC))
       # if it was a removal (replacement with empty=0), notify
       if (valToPlace == 0):
-        print(">>> Removed team {}'s pawn from {} <<<".format(prevTeamVal, BOARD_CARD_LAYOUT[bestLocR][bestLocC]))
+        print(">>> Removed team {}'s pawn from {} <<<".format(self.teamColorNames[prevTeamVal], BOARD_CARD_LAYOUT[bestLocR][bestLocC]))
       # if it was a two eyed jack, notify
       if (bestCard in TWO_EYED_JACKS):
         print(">>> Placed pawn on {} space <<<".format(BOARD_CARD_LAYOUT[bestLocR][bestLocC]))
