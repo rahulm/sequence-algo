@@ -134,8 +134,9 @@ class SequencePlayer():
     while (gameIncomplete):
       teamToMove = self.playerToTeamMap[playerToMove]
       
+      shouldPrintBoard = True
+      
       if (playerToMove == self.playerId):
-        print("My turn.")
         self.playBotTurn(playerToMove, teamToMove)
       else:
         self.recordPlayerTurn(playerToMove, teamToMove, markers)
@@ -148,9 +149,9 @@ class SequencePlayer():
       markers["oneEyedJack"] = False
       markers["twoEyedJack"] = False
       
-      self.printBoard()
-      print("")
       playerToMove = (playerToMove % self.numPlayers) + 1
+      
+      print("---\n\n")
       
       # check if any team has won
       for teamId, teamScore in self.teamScores.items():
@@ -309,11 +310,16 @@ class SequencePlayer():
       # if the score is already a winning one, then end
       if self.teamScores[teamToMove] >= self.numSequencesToWin:
         break
-      
+    
+    print("")
+    self.printBoard()
+    
   def calculateHeuristicScore(self, teamId):
     return 0
   
   def playBotTurn(self, botPlayerId, botTeamId):
+    print("My turn.")
+    
     # for this algo:
     # - always replace dead cards first
     # - determine card to play based on heuristic-based planning. see below.
@@ -438,7 +444,7 @@ class SequencePlayer():
       self.board[bestLocR][bestLocC] = valToPlace
       
       # print action
-      print("\nPLAYED >>> {} at row={} col={} <<<".format(bestCard, bestLocR, bestLocC))
+      print(">>> Played {} at row={} col={} <<<".format(bestCard, bestLocR, bestLocC))
     
     # after performing the action, check if any sequences were made.
     # if they were, automatically select the first one every time.
@@ -472,6 +478,8 @@ class SequencePlayer():
         break
       else:
         print("Card '{}' invalid. Retrying.".format(nextCard))
+    
+    
     
     # perform heuristic-based planning.
     # select the card/placement that will maximize the path score.
@@ -583,11 +591,7 @@ class SequencePlayer():
     """
     
     
-    
-    
-    
-    
-  
+
   def newSequencesMade(self, teamIds = None):
     if teamIds is None:
       teamIds = {t for t in range(1, self.numTeams + 1)}
