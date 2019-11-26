@@ -39,15 +39,24 @@ TWO_EYED_JACKS = {"jd", "jc"}
 VALID_CARDS = {"5c", "5s", "7d", "5d", "8s", "10d", "jc", "3c", "3s", "4c", "7c", "qs", "8h", "3h", "6c", "10c", "ad", "jd", "8c", "ks", "2h", "7h", "6d", "3d", "2c", "jh", "5h", "4d", "js", "9s", "9h", "kc", "10h", "qh", "10s", "4s", "9c", "6s", "4h", "kd", "qd", "2s", "8d", "ah", "as", "2d", "7s", "qc", "6h", "ac", "9d", "kh"}
 
 
+ASCII_COLOR_CODES = {
+  "blue" : "\033[94m",
+  "green" : "\033[92m",
+  "red" : "\033[91m",
+  "end" : "\033[0m"
+}
+
 class SequencePlayer():
   playerId = None
   numPlayers = None
   numTeams = None
   numSequencesToWin = None
   numCardsPerHand = None
-  
   playerToTeamMap = None
   teamScores = None
+  
+  teamColorNames = None
+  teamColorAscii = None
   
   board = None
   boardLen = 10
@@ -55,7 +64,7 @@ class SequencePlayer():
   
   botHand = None
   
-  def __init__(self, playerId, numPlayers, numTeams, numSequencesToWin, numCardsPerHand):
+  def __init__(self, playerId, numPlayers, numTeams, numSequencesToWin, numCardsPerHand, teamColors = None):
     self.playerId = playerId
     self.numPlayers = numPlayers
     self.numTeams = numTeams
@@ -75,6 +84,16 @@ class SequencePlayer():
     self.teamScores = {team : 0 for team in range(1, self.numTeams + 1)}
     
     self.botHand = []
+    
+    if teamColors is None:
+      self.teamColorNames = {t : str(t) for t in range(1, self.numTeams + 1)}
+      self.teamColorAscii = {t : "" for t in range(1, self.numTeams + 1)}
+      self.teamColorAscii["end"] = ""
+    else:
+      # assumes teamColors is a list, ordered by team order
+      self.teamColorNames = {(t + 1) : tcolor.lower() for t, tcolor in enumerate(teamColors)}
+      self.teamColorAscii = {t : ASCII_COLOR_CODES[tcolor] for t, tcolor in self.teamColorNames.items()}
+      self.teamColorAscii["end"] = ASCII_COLOR_CODES["end"]
   
   def printMatrix(self, matrix, spacing):
     for row in matrix:
@@ -86,7 +105,12 @@ class SequencePlayer():
     self.printMatrix(BOARD_CARD_LAYOUT, 6)
   
   def printBoard(self):
-    self.printMatrix(self.board, 6)
+    for row in self.board:
+      for val in row:
+        head = "" if ((val == "free") or (val == 0)) else self.teamColorAscii[abs(val)]
+        foot = "" if ((val == "free") or (val == 0)) else self.teamColorAscii["end"]
+        print("{}{}{}".format(head, str(val).ljust(6), foot), end = "")
+      print("")
   
   def printSequence(self, seq):
     emptyBoard = [[0 for r in range(self.boardLen)] for c in range(self.boardLen)]
