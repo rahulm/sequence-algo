@@ -310,12 +310,13 @@ class SequencePlayer():
       if self.teamScores[teamToMove] >= self.numSequencesToWin:
         break
       
+  def calculateHeuristicScore(self, teamId):
+    return 0
   
-  def playBotTurn(self, playerToMove, teamToMove):
+  def playBotTurn(self, botPlayerId, botTeamId):
     # for this algo:
     # - always replace dead cards first
-    # - play the card that maximizes the total length of sequences if a card is placed
-    # - currently, does not make any attempts at blocking opponents
+    # - determine card to play based on heuristic-based planning. see below.
     
     # replace dead card, if possible
     for cardInd in range(len(self.botHand)):
@@ -344,6 +345,247 @@ class SequencePlayer():
         break
     
     print("Bot hand: {}".format(self.botHand))
+    
+    bestAction = {
+      "card" : None,
+      "location" : None,
+      "score" : float("-inf")
+    }
+    # bestAction contains:
+    # - card : the card to use from self.botHand
+    # - location : the (r, c) where the action should take place
+    # - score : the score of this action
+    # The action (addition or removal) is inferred from the card.
+    
+    # flag if the bot should search for a killer move
+    killerMoveNeeded = (self.teamScores[botTeamId] == (self.numSequencesToWin - 1))
+    
+    # perform search to find the best card to place
+    for card in self.botHand:
+      
+      # the list of locations where the action can be taken
+      locationOptions = None
+      
+      # note the type of action for ease of use
+      isRemoval = False
+      
+      if card in ONE_EYED_JACKS:
+        isRemoval = True
+        allowedVals = {t for t in range(1, self.numTeams + 1) if (t != botTeamId)}
+        locationOptions = [
+          (r, c) for r in range(self.boardLen) for c in range(self.boardLen)
+          if (self.board[r][c] in allowedVals)
+        ]
+      elif card in TWO_EYED_JACKS:
+        allowedVals = {0}
+        locationOptions = [
+          (r, c) for r in range(self.boardLen) for c in range(self.boardLen)
+          if (self.board[r][c] in allowedVals)
+        ]
+      else:
+        locationOptions = [
+          (r, c) for (r, c) in CARD_LOCS[card]
+          if (self.board[r][c] == 0)
+        ]
+      
+      # save the value to place, for ease of use
+      valToPlace = 0 if isRemoval else botTeamId
+      
+      killerMoveFound = False
+      # try placing (or removing) a pawn from each location in locationOptions
+      for (pawnR, pawnC) in locationOptions:
+        # get previous value for restoration
+        prevVal = self.board[pawnR][pawnC]
+        
+        # place valToPlace
+        self.board[pawnR][pawnC] = valToPlace
+        
+        # killer move check:
+        # if the bot team needs only one more sequence to win, and this pawn placement created a new sequence, then use this
+        if killerMoveNeeded:
+          # test if any sequences were made
+          killerMoveFound = (len(self.newSequencesMade(botTeamId)) > 0)
+        
+        # if a killer move was not found, then continue search
+        if not killerMoveFound:
+          placementScore = self.calculateHeuristicScore(botTeamId)
+          if (placementScore > bestAction["score"]):
+            bestAction["card"] = card
+            bestAction["location"] = (pawnR, pawnC)
+            bestAction["score"] = placementScore
+        
+        # replace prevVal to pawn location at the end of this iteration
+        self.board[pawnR][pawnC] = prevVal
+        
+        # break if a killer move was found
+        if killerMoveFound:
+          break
+        
+    
+    
+    # if the action is unfilled, then no valid one was found, and we must continue without performing it
+    if (bestAction["card"] is None):
+      print("No valid card found. Please skip my turn.")
+    else:
+      # remove card from botHand to play it
+      bestCard = bestAction["card"]
+      bestLocR = bestAction["location"][0]
+      bestLocC = bestAction["location"][1]
+      self.botHand.remove(bestCard)
+      
+      # place or remove pawn at location, as necessary
+      valToPlace = 0 if (bestCard in ONE_EYED_JACKS) else botTeamId
+      self.board[bestLocR][bestLocC] = valToPlace
+      
+      # print action
+      print("\nPLAYED >>> {} at row={} col={} <<<".format(bestCard, bestLocR, bestLocC))
+    
+    # after performing the action, check if any sequences were made.
+    # if they were, automatically select the first one every time.
+    while True:
+      seqsMade = self.newSequencesMade(botTeamId)
+      if (len(seqsMade) == 0):
+        break
+      else:
+        # apply the first sequence
+        seqToApply = seqsMade[0]
+        for (r, c) in seqToApply:
+          if (self.board[r][c] == botTeamId):
+            self.board[r][c] = -botTeamId
+        
+        # increment bot sequence count
+        self.teamScores[botTeamId] += 1
+    
+    # print updated board
+    self.printBoard()
+    
+    # print new team score
+    print("Bot team score: {}\n".format(self.teamScores[botTeamId]))
+    
+    # ask for next card
+    print("I need to pick up a card.")
+    while True:
+      nextCard = input("Card picked up: ")
+      if nextCard in VALID_CARDS:
+        self.botHand.append(nextCard)
+        print("Added card {}.".format(nextCard))
+        break
+      else:
+        print("Card '{}' invalid. Retrying.".format(nextCard))
+    
+    # perform heuristic-based planning.
+    # select the card/placement that will maximize the path score.
+    # the path score for the board = (bot's heuristic score) - (alpha * (sum of heuristic scores of all other teams))
+    # alpha is a hyperparmeter to place more or less weight on minimizing opponent scores.
+    # need to determine an appropriate heuristic score.
+    # can keep the best action in a dictionary for ease.
+    
+    """
+    Heuristic ideas:
+    (can be combined, such as with a weighted average)
+    (this is per team)
+    
+    + number of completed sequences
+    + number of pawns on the board
+    + average length of all sequences (even incomplete)
+    
+    ---
+    For each 5 card segment on the board:
+      = ((# bot pawns) - (# opponent pawns))^3
+    Average or sum the above values.
+    
+    [ b b b 0 0 ]
+    = (3 - 0)^3 = 27
+    [ b b b b 0 ]
+    = (4 - 0)^3 = 64
+    delta = 64 - 27 = 37
+    
+    [ g g g g 0 ]
+    = (0 - 4)^3 = (-4)^3 = -64
+    [ g g g g b ]
+    = (1 - 4)^3 = (-3)^3 = -27
+    delta = (-27) - (-64) = 37
+    
+    
+    ---
+    For each 5 card segment on the board:
+      h(team) = ((alpha * (# team pawns)) - (# opponent pawns))^3
+        (alpha > 1)
+      
+      h(bot) = ((# bot pawns) - (# opponent pawns))^3 - (sum of h(team) for all opponent teams)
+    Average or sum the above h(bot) values.
+    
+    alpha = 2
+    [ b b b 0 0 ]
+    = (3 - 0)^3 - (0) = 27
+    [ b b b b 0 ]
+    = (4 - 0)^3 - (0) = 64
+    delta = 64 - 27 = 37
+    
+    [ g g g g 0 ]
+    = (0 - 4)^3 - (2*4 - 0)^3 = (-4)^3 - (8)^3 = -64 - 512 = -576
+    [ g g g g b ]
+    = (1 - 4)^3 - (2*4 - 1)^3 = (-3)^3 - (7)^3 = -27 - 343 = -370
+    delta = (-370) - (-576) = 206
+    
+    ---
+    For each 5 card segment on the board:
+      h(team) = ((# team pawns) - (# opponent pawns))^3
+      
+      h(bot) = ((# bot pawns) - (# opponent pawns))^3 - (sum of h(team) for all opponent teams)
+    Average or sum the above h(bot) values.
+    
+    [ b b b 0 0 ]
+    = (3 - 0)^3 - (0) = 27
+    [ b b b b 0 ]
+    = (4 - 0)^3 - (0) = 64
+    delta = 64 - 27 = 37
+    
+    [ g g 0 0 0 ]
+    = (0 - 2)^3 - (2 - 0)^3 = (-2)^3 - (2)^3 = -8 - 8 = -16
+    [ g g b 0 0 ]
+    = (1 - 2)^3 - (2 - 1)^3 = (-1)^3 - (1)^3 = -1 - 1 = -2
+    delta = (-2) - (-16) = 14
+    
+    [ g g g 0 0 ]
+    = (0 - 3)^3 - (3 - 0)^3 = (-3)^3 - (3)^3 = -27 - 27 = -54
+    [ g g g b 0 ]
+    = (1 - 3)^3 - (3 - 1)^3 = (-2)^3 - (2)^3 = -8 - 8 = -16
+    delta = (-16) - (-54) = 38
+    
+    [ g g g g 0 ]
+    = (0 - 4)^3 - (4 - 0)^3 = (-4)^3 - (4)^3 = -64 - 64 = -128
+    [ g g g g b ]
+    = (1 - 4)^3 - (4 - 1)^3 = (-3)^3 - (3)^3 = -27 - 27 = -54
+    delta = (-54) - (-128) = 74
+    
+    [ b b b b 0 ]
+    = (4 - 0)^3 - (0) = 64
+    [ b b b b b ]
+    = (5 - 0)^3 - (0) = 125
+    delta = 125 - 64 = 61
+    
+    
+    ---
+    For each 5 card segment on the board:
+      h(team) = ((teamScore[team] + 1)/numSequencesToWin) * ((# team pawns) - (# opponent pawns))^3
+      
+      score = h(bot) - (sum of h(team) for all opponent teams)
+      
+    Average or sum the above score values.
+    
+    >>> For now, hardcode the "killer move".
+    >>> That is, if the bot's team only needs one more sequence to win, and the bot finds a 5 card segment it can fill to make a sequence, immediately select that and return.
+    >>> Need to look into better heuristic/score functions.
+    >>> May be able to train a CNN-type model through reinforcement learning based only on the current game state and the bot's hand. (Through simulated play against itself.)
+    
+    
+    """
+    
+    
+    
+    
+    
     
   
   def newSequencesMade(self, teamIds = None):
