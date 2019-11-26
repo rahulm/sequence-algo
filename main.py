@@ -29,7 +29,8 @@ def main(args):
     numPlayers = numPlayers,
     numTeams = numTeams,
     numSequencesToWin = numSequencesToWin,
-    numCardsPerHand = numCardsPerHand
+    numCardsPerHand = numCardsPerHand,
+    teamColors = args.colors
   )
   seqPlayer.play()
 
@@ -49,6 +50,11 @@ def parseArgs():
     "--pos", type = int, required = True,
     help = "Player position for computer. Ex: 1 means plays first, 2 means second, etc."
   )
+  parser.add_argument(
+    "--colors", type = list, required = False,
+    default = None,
+    help = "Color abbreviations for teams, listed by team order, no spaces. Ex: 'bgr'"
+  )
   
   args = parser.parse_args()
   if ((args.players % args.teams) != 0):
@@ -56,6 +62,10 @@ def parseArgs():
   
   if (args.pos <= 0) or (args.pos > args.players):
     parser.error("--pos ({}) is invalid.".format(args.pos))
+  
+  if args.colors is not None:
+    colorMap = {"b" : "blue", "g" : "green", "r" : "red"}
+    args.colors = [colorMap[c] for c in args.colors]
   
   return args
 
