@@ -514,13 +514,11 @@ class SequencePlayer():
           # test if any sequences were made
           killerMoveFound = (len(self.newSequencesMade(botTeamId)) > 0)
         
-        # if a killer move was not found, then continue search
-        if not killerMoveFound:
-          placementScore = self.calculateHeuristicScore(botTeamId)
-          if (placementScore > bestAction["score"]):
-            bestAction["card"] = card
-            bestAction["location"] = (pawnR, pawnC)
-            bestAction["score"] = placementScore
+        placementScore = self.calculateHeuristicScore(botTeamId)
+        if (killerMoveFound or (placementScore > bestAction["score"])):
+          bestAction["card"] = card
+          bestAction["location"] = (pawnR, pawnC)
+          bestAction["score"] = placementScore
         
         # replace prevVal to pawn location at the end of this iteration
         self.board[pawnR][pawnC] = prevVal
